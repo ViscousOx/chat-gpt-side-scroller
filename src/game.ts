@@ -1,7 +1,11 @@
 import Phaser from "phaser";
 import spritesheet from "../public/whale.png";
+import background from "../public/water.png";
 
 class GameScene extends Phaser.Scene {
+  private background!: Phaser.GameObjects.TileSprite;
+  private sprite!: Phaser.GameObjects.Sprite;
+
   constructor() {
     super({ key: "GameScene" });
   }
@@ -12,10 +16,24 @@ class GameScene extends Phaser.Scene {
       frameWidth: 115,
       frameHeight: 44,
     });
+
+    this.load.image("background", background);
   }
 
   create() {
-    const sprite = this.add.sprite(25, 300, "mySprite", 0);
+    const gameWidth = this.game.config.width as number;
+    const gameHeight = this.game.config.height as number;
+
+    this.background = this.add.tileSprite(
+      0,
+      0,
+      gameWidth,
+      gameHeight,
+      "background"
+    );
+    this.background.setOrigin(0, 0);
+
+    this.sprite = this.add.sprite(25, 300, "mySprite", 0);
     // Additional configuration and customization of the sprite
 
     // Define the animation frames
@@ -33,18 +51,20 @@ class GameScene extends Phaser.Scene {
     this.anims.create(config);
 
     // Set the anchor to the center of the sprite and play the animation
-    sprite.setOrigin(0.5, 0.5);
-    sprite.setScale(-1, 1);
-    sprite.play("myAnimation");
+    this.sprite.setOrigin(0.5, 0.5);
+    this.sprite.setScale(-1, 1);
+    this.sprite.play("myAnimation");
 
     // Set initial camera position to match the sprite
-    this.cameras.main.startFollow(sprite);
+    // this.cameras.main.startFollow(this.sprite);
   }
 
   update() {
-    // Move the scene around the sprite
-    this.cameras.main.scrollX += 1;
-    this.cameras.main.scrollY += 1;
+    const speedX = 0.5;
+    // const speedY = 0.2;
+
+    this.background.tilePositionX += speedX;
+    // this.background.tilePositionY += speedY;
   }
 }
 
