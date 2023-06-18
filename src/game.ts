@@ -5,6 +5,8 @@ import background from "../public/water.png";
 class GameScene extends Phaser.Scene {
   private background!: Phaser.GameObjects.TileSprite;
   private sprite!: Phaser.GameObjects.Sprite;
+  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
+  private keys!: Record<string, Phaser.Input.Keyboard.Key> | undefined;
 
   constructor() {
     super({ key: "GameScene" });
@@ -23,6 +25,13 @@ class GameScene extends Phaser.Scene {
   create() {
     const gameWidth = this.game.config.width as number;
     const gameHeight = this.game.config.height as number;
+
+    // Enable keyboard input
+    this.cursors = this.input.keyboard?.createCursorKeys();
+    this.keys = this.input.keyboard?.addKeys("W,A,S,D") as Record<
+      string,
+      Phaser.Input.Keyboard.Key
+    >;
 
     this.background = this.add.tileSprite(
       0,
@@ -61,10 +70,26 @@ class GameScene extends Phaser.Scene {
 
   update() {
     const speedX = 0.5;
-    // const speedY = 0.2;
+    const speed = 5;
 
+    // Background movement
     this.background.tilePositionX += speedX;
-    // this.background.tilePositionY += speedY;
+
+    // Horizontal movement
+    if (this.keys) {
+      if (this.keys.A.isDown) {
+        this.sprite.x -= speed;
+      } else if (this.keys.D.isDown) {
+        this.sprite.x += speed;
+      }
+
+      // Vertical movement
+      if (this.keys.W.isDown) {
+        this.sprite.y -= speed;
+      } else if (this.keys.S.isDown) {
+        this.sprite.y += speed;
+      }
+    }
   }
 }
 
