@@ -2,7 +2,7 @@
   "name": "chat-gpt-side-scroller",
   "version": "1.0.0",
   "description": "A hackathon prompt to create a web-based game using chat gpt",
-  "main": "index.js",
+  "main": "bundle.js",
   "scripts": {
     "start": "webpack-dev-server --mode development --open",
     "build": "webpack --mode production"
@@ -15,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "file-loader": "^6.2.0",
     "phaser": "^3.60.0",
     "ts-loader": "^9.4.3",
     "typescript": "^5.1.3",
