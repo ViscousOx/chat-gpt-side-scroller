@@ -15,9 +15,12 @@ class GameScene extends Phaser.Scene {
   private spawnPoints: { x: number; y: number }[];
   private obstacleVelocity: number;
   private boatVelocity: number;
-  private orcaDebug: Phaser.GameObjects.Text | undefined;
+  private gameText: Phaser.GameObjects.Text | undefined;
 
   private outOfBoundXSpawnPoint: number = 780;
+  private orcaSpeed: number = 5;
+  private backgroundSpeed: number = 0.5;
+  private gamePlaying: boolean = true;
   private shouldRocksSpawn: boolean = true; //TODO: make this dynamic
   private shouldBoatsSpawn: boolean = true; //TODO: make this dynamic
 
@@ -44,6 +47,26 @@ class GameScene extends Phaser.Scene {
     this.boatVelocity = -100; // pixels per second
   }
 
+  collisionOrcaRock() {
+    this.gamePlaying = false;
+    this.obstacles.setVelocityX(0);
+    this.boats.setVelocityX(0);
+    this.gameText?.setText("game over!");
+
+    this.keys?.SPACE.on(
+      "down",
+      () => {
+        this.gamePlaying = true;
+        this.scene.restart();
+      },
+      this
+    );
+  }
+
+  collisionBoatRock(boat: Phaser.Physics.Arcade.Sprite) {
+    boat.destroy();
+  }
+
   spawnObstacle() {
     const spawnPointIndex = Math.floor(Math.random() * this.spawnPoints.length);
     const spawnPoint = this.spawnPoints[spawnPointIndex];
@@ -60,31 +83,38 @@ class GameScene extends Phaser.Scene {
     if (obstacle.body) {
       obstacle.body.velocity.x = this.obstacleVelocity;
     }
+
+    this.physics.add.collider(
+      this.sprite,
+      obstacle,
+      this.collisionOrcaRock,
+      undefined,
+      this
+    );
   }
 
   spawnBoat() {
-    const obstacle = this.physics.add.sprite(
+    const boat = this.physics.add.sprite(
       this.outOfBoundXSpawnPoint,
       75,
       "boat",
       0
     );
-    obstacle.setScale(-1, 1);
-    this.boats.add(obstacle);
+    boat.setScale(-1, 1);
+    this.boats.add(boat);
 
-    this.physics.world.enable(obstacle);
-    if (obstacle.body) {
-      obstacle.body.velocity.x = this.boatVelocity;
+    this.physics.world.enable(boat);
+    if (boat.body) {
+      boat.body.velocity.x = this.boatVelocity;
     }
-  }
 
-  // Custom method to update the text position and content
-  updateTextPosition(
-    text: Phaser.GameObjects.Text,
-    sprite: Phaser.GameObjects.Sprite
-  ) {
-    text.setPosition(sprite.x + 50, sprite.y - 230);
-    text.setText(`X: ${sprite.x.toFixed(2)} Y: ${sprite.y.toFixed(2)}`);
+    this.physics.add.collider(
+      this.sprite,
+      boat,
+      () => this.collisionBoatRock(boat),
+      undefined,
+      this
+    );
   }
 
   preload() {
@@ -104,8 +134,11 @@ class GameScene extends Phaser.Scene {
     const gameWidth = this.game.config.width as number;
     const gameHeight = this.game.config.height as number;
 
+    // Set game text
+    this.gameText = this.add.text(350, 0, "wanna play?", { color: "black" });
+
     // Enable keyboard input
-    this.keys = this.input.keyboard?.addKeys("W,A,S,D") as Record<
+    this.keys = this.input.keyboard?.addKeys("W,A,S,D,SPACE") as Record<
       string,
       Phaser.Input.Keyboard.Key
     >;
@@ -118,12 +151,10 @@ class GameScene extends Phaser.Scene {
     this.coral.setOrigin(0, 0);
     this.coral.setDepth(1);
 
-    this.sprite = this.add.sprite(25, 400, "orca", 0);
-    this.orcaDebug = this.add.text(
-      25,
-      400,
-      `X: ${this.sprite.x.toFixed(2)} Y: ${this.sprite.y.toFixed(2)}`
-    );
+    this.sprite = this.physics.add.sprite(25, 400, "orca", 0);
+    // Set the anchor to the center of the sprite and play the animation
+    this.sprite.setOrigin(1, 5);
+    this.sprite.setScale(-1, 1);
 
     // Add obstacles
     this.obstacles = this.physics.add.group();
@@ -142,74 +173,63 @@ class GameScene extends Phaser.Scene {
 
     // Create the animation
     this.anims.create(config);
-
-    // Set the anchor to the center of the sprite and play the animation
-    this.sprite.setOrigin(1, 5);
-    this.orcaDebug.setOrigin(0.5, 1); // Set origin to center bottom
-    this.sprite.setScale(-1, 1);
     this.sprite.play("myAnimation");
-
-    this.updateTextPosition(this.orcaDebug, this.sprite);
   }
 
   update() {
-    const speedX = 0.5;
-    const speed = 5;
+    if (this.gamePlaying) {
+      // Background movement
+      this.water.tilePositionX += this.backgroundSpeed;
+      this.coral.tilePositionX += this.backgroundSpeed;
 
-    // Background movement
-    this.water.tilePositionX += speedX;
-    this.coral.tilePositionX += speedX;
-
-    // Horizontal movement
-    if (this.keys) {
-      if (this.keys.A.isDown) {
-        this.sprite.x -= speed;
-      } else if (this.keys.D.isDown) {
-        this.sprite.x += speed;
-      }
-
-      // Vertical movement
-      if (this.keys.W.isDown) {
-        this.sprite.y -= speed;
-      } else if (this.keys.S.isDown) {
-        this.sprite.y += speed;
-      }
-    }
-
-    if (this.shouldRocksSpawn) {
-      // Check if any obstacle reaches the game boundaries
-      const obstaclesArray =
-        this.obstacles.getChildren() as Phaser.Physics.Arcade.Sprite[];
-      obstaclesArray.forEach((obstacle) => {
-        if (obstacle.x <= 0) {
-          obstacle.destroy();
+      // Horizontal movement
+      if (this.keys) {
+        if (this.keys.A.isDown) {
+          this.sprite.x -= this.orcaSpeed;
+        } else if (this.keys.D.isDown) {
+          this.sprite.x += this.orcaSpeed;
         }
-      });
 
-      // Spawn new obstacle if there are none
-      if (this.obstacles.getLength() === 0) {
-        this.spawnObstacle();
-      }
-    }
-
-    if (this.shouldBoatsSpawn) {
-      // Check if any obstacle reaches the game boundaries
-      const boatsArray =
-        this.boats.getChildren() as Phaser.Physics.Arcade.Sprite[];
-      boatsArray.forEach((boat) => {
-        if (boat.x <= 0) {
-          boat.destroy();
+        // Vertical movement
+        if (this.keys.W.isDown) {
+          this.sprite.y -= this.orcaSpeed;
+        } else if (this.keys.S.isDown) {
+          this.sprite.y += this.orcaSpeed;
         }
-      });
+      }
 
-      // Spawn new obstacle if there are none
-      if (this.boats.getLength() === 0) {
-        this.spawnBoat();
+      if (this.shouldRocksSpawn) {
+        // Check if any obstacle reaches the game boundaries
+        const obstaclesArray =
+          this.obstacles.getChildren() as Phaser.Physics.Arcade.Sprite[];
+        obstaclesArray.forEach((obstacle) => {
+          if (obstacle.x <= 0) {
+            obstacle.destroy();
+          }
+        });
+
+        // Spawn new obstacle if there are none
+        if (this.obstacles.getLength() === 0) {
+          this.spawnObstacle();
+        }
+      }
+
+      if (this.shouldBoatsSpawn) {
+        // Check if any obstacle reaches the game boundaries
+        const boatsArray =
+          this.boats.getChildren() as Phaser.Physics.Arcade.Sprite[];
+        boatsArray.forEach((boat) => {
+          if (boat.x <= 0) {
+            boat.destroy();
+          }
+        });
+
+        // Spawn new obstacle if there are none
+        if (this.boats.getLength() === 0) {
+          this.spawnBoat();
+        }
       }
     }
-
-    // Update the text position and content
-    this.updateTextPosition(this.orcaDebug!, this.sprite);
   }
 }
 
