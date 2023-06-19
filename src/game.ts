@@ -17,8 +17,6 @@ class GameScene extends Phaser.Scene {
   private boatVelocity: number;
   private gameText: Phaser.GameObjects.Text | undefined;
 
-  private orcaDebug: Phaser.GameObjects.Text | undefined;
-
   private outOfBoundXSpawnPoint: number = 780;
   private orcaSpeed: number = 5;
   private backgroundSpeed: number = 0.5;
@@ -119,15 +117,6 @@ class GameScene extends Phaser.Scene {
     );
   }
 
-  // Custom method to update the text position and content
-  updateTextPosition(
-    text: Phaser.GameObjects.Text,
-    sprite: Phaser.GameObjects.Sprite
-  ) {
-    text.setPosition(sprite.x + 50, sprite.y - 230);
-    text.setText(`X: ${sprite.x.toFixed(2)} Y: ${sprite.y.toFixed(2)}`);
-  }
-
   preload() {
     // Load your game assets here
     this.load.spritesheet("orca", spritesheet, {
@@ -163,15 +152,9 @@ class GameScene extends Phaser.Scene {
     this.coral.setDepth(1);
 
     this.sprite = this.physics.add.sprite(25, 400, "orca", 0);
-    this.orcaDebug = this.add.text(
-      25,
-      400,
-      `X: ${this.sprite.x.toFixed(2)} Y: ${this.sprite.y.toFixed(2)}`
-    );
     // Set the anchor to the center of the sprite and play the animation
     this.sprite.setOrigin(1, 5);
     this.sprite.setScale(-1, 1);
-    this.orcaDebug.setOrigin(0.5, 1); // Set origin to center bottom
 
     // Add obstacles
     this.obstacles = this.physics.add.group();
@@ -191,8 +174,6 @@ class GameScene extends Phaser.Scene {
     // Create the animation
     this.anims.create(config);
     this.sprite.play("myAnimation");
-
-    this.updateTextPosition(this.orcaDebug, this.sprite);
   }
 
   update() {
@@ -248,9 +229,6 @@ class GameScene extends Phaser.Scene {
           this.spawnBoat();
         }
       }
-
-      // Update the text position and content
-      this.updateTextPosition(this.orcaDebug!, this.sprite);
     }
   }
 }
