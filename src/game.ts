@@ -16,21 +16,30 @@ class GameScene extends Phaser.Scene {
 
   private orcaText: Phaser.GameObjects.Text | undefined;
 
+  generateRandomArrayForObstacles(
+    arraySize: number,
+    lower: number,
+    upper: number
+  ): { x: number; y: number }[] {
+    const arr: { x: number; y: number }[] = [];
+    for (let i = 0; i < arraySize; i++) {
+      const randomNumber =
+        Math.floor(Math.random() * (upper - lower + 1)) + upper;
+      arr.push({ x: 780, y: randomNumber });
+    }
+    return arr;
+  }
+
   constructor() {
     super({ key: "GameScene" });
 
-    this.spawnPoints = [
-      { x: 100, y: 200 },
-      { x: 300, y: 300 },
-      { x: 500, y: 150 },
-      // Add more spawn points as needed
-    ];
+    this.spawnPoints = this.generateRandomArrayForObstacles(20, 150, 250);
 
     this.obstacleVelocity = -200; // pixels per second
   }
 
   spawnObstacle() {
-    const spawnPointIndex = Phaser.Math.Between(0, this.spawnPoints.length - 1);
+    const spawnPointIndex = Math.floor(Math.random() * this.spawnPoints.length);
     const spawnPoint = this.spawnPoints[spawnPointIndex];
 
     const obstacle = this.physics.add.sprite(
@@ -52,7 +61,7 @@ class GameScene extends Phaser.Scene {
     text: Phaser.GameObjects.Text,
     sprite: Phaser.GameObjects.Sprite
   ) {
-    text.setPosition(sprite.x + 50, sprite.y - 130);
+    text.setPosition(sprite.x + 50, sprite.y - 230);
     text.setText(`X: ${sprite.x.toFixed(2)} Y: ${sprite.y.toFixed(2)}`);
   }
 
