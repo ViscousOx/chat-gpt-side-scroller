@@ -164,7 +164,7 @@ class GameScene extends Phaser.Scene {
     const obstaclesArray =
       this.obstacles.getChildren() as Phaser.Physics.Arcade.Sprite[];
     obstaclesArray.forEach((obstacle) => {
-      if (obstacle.x >= Number(this.game.config.width)) {
+      if (obstacle.x <= 0) {
         obstacle.destroy();
       }
     });
