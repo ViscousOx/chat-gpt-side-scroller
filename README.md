@@ -31,7 +31,7 @@ Weird things i've noticed:
 You can start this project locally by pulling down the master branch and running...
 
 ```bash
-npm run start
+npm run start:dev
 ```
 
 or you can find this project hosted online [here](https://chat-gpt-side-scroller-7e26fb04a89f.herokuapp.com/)
