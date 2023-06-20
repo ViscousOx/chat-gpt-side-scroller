@@ -30,7 +30,7 @@ Weird things i've noticed:
 
 You can start this project locally by pulling down the master branch and running...
 
-```
+```bash
 npm run start
 ```
 
