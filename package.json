@@ -4,7 +4,8 @@
   "description": "A hackathon prompt to create a web-based game using chat gpt",
   "main": "bundle.js",
   "scripts": {
-    "start": "node --optimize_for_size --max-old-space-size=460 node_modules/webpack-dev-server/bin/webpack-dev-server.js --mode development --open",
+    "start": "node --optimize_for_size --max-old-space-size=460 node_modules/webpack-dev-server/bin/webpack-dev-server.js --port $PORT --host 0.0.0.0 --mode development --open",
+    "start:dev": "node --optimize_for_size --max-old-space-size=460 node_modules/webpack-dev-server/bin/webpack-dev-server.js --mode development --open",
     "build": "node --optimize_for_size --max-old-space-size=460 node_modules/webpack/bin/webpack.js --mode production"
   },
   "repository": {
