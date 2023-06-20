@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY . .
 
 # Install only production dependencies
-RUN npm ci
+RUN npm install
 
 # Expose the desired port
 EXPOSE 3000
